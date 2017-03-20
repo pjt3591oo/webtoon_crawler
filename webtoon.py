@@ -5,7 +5,7 @@ from urllib.parse import urlparse, parse_qs, urljoin
 import requests as rq
 from bs4 import BeautifulSoup
 
-from config import CR_config as WC
+from config.CR_config import url as WC
 from database import db_session
 from models.webtoonCommends import WebtoonCommends
 from models.webtoonCuts import WebToonCuts
@@ -21,11 +21,14 @@ def get_daylywebtoons():
     '''
     요일 웹툰을 수집
     '''
-    webtoon_main_url = WC.TOP_URL
+
+    webtoon_main_url = WC['TOP_URL']
+
     res = rq.get(webtoon_main_url)
+
     main_soup = BeautifulSoup(res.content, 'lxml')
 
-    webtoon_links = [{"title": a_tag.get('title'), "link": urljoin(WC.NAVER_URL, a_tag.get('href'))}
+    webtoon_links = [{"title": a_tag.get('title'), "link": urljoin(WC['NAVER_URL'], a_tag.get('href'))}
                       for a_tag in main_soup.select('.daily_all a.title')]
 
     return webtoon_links
@@ -66,7 +69,7 @@ def get_all_webtoon(webtoon, is_save):
 
         for a_tag in a_tags:
             t = a_tag.text.replace('\n', '').replace('\r', '').replace('\t', '')
-            h = urljoin(WC.NAVER_URL, a_tag.get('href'))
+            h = urljoin(WC['NAVER_URL'], a_tag.get('href'))
 
             if h not in target_webtoons:
                 target_webtoons.append(h)
@@ -109,7 +112,7 @@ def data_parse(soup, url, max_commend_page=3):
         finally:
             db_session.close()
 
-    comment_url = WC.NAVER_URL + '/comment/comment.nhn?titleId=' + titleId + '&no=' + no
+    comment_url = WC['NAVER_URL'] + '/comment/comment.nhn?titleId=' + titleId + '&no=' + no
     objectId = titleId + '_' + no
 
     page_count = 1
