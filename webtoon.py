@@ -82,7 +82,7 @@ def get_all_webtoon(webtoon, is_save):
     return webtoon_title.strip(), webtoon_id, weekday, target_webtoons
 
 
-def data_parse(soup, url):
+def data_parse(soup, url, max_commend_page=3):
 
     rank = soup.select('#topPointTotalNumber')[0].text
     title = soup.title.text.split(':')[0]
@@ -116,7 +116,7 @@ def data_parse(soup, url):
 
     u = 'http://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=comic&templateId=webtoon&pool=cbox3&_callback=jQuery1113012327623800394427_1489937311100&lang=ko&country=KR&objectId=' +objectId+ '&categoryId=&pageSize=15&indexSize=10&groupId=&listType=OBJECT&sort=NEW&_=1489937311112'
 
-    while page_count < 3:  # True를 주면 모든 댓글을 수집함
+    while page_count < max_commend_page:  # True를 주면 모든 댓글을 수집함
         comment_url = make_link(u, page_count)
         header = {
             "Host": "apis.naver.com",
@@ -156,9 +156,9 @@ def data_parse(soup, url):
                         db_session.close()
 
             if not len(comments):
+                # 댓글 마지막 페이지
                 break
             else:
-                print('==')
                 page_count += 1
         except:
             pass
